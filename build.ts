@@ -1,4 +1,5 @@
 import path from "node:path";
+import pkg from "./package.json";
 
 const externals = [
   "crypto",
@@ -59,7 +60,7 @@ await Bun.build({
   target: "node",
   format: "cjs",
   define: {
-    "MANIFEST_VERSION": '"0.0.0"',
+    "MANIFEST_VERSION": `"${pkg.version}"`,
   },
   plugins: [
     mockWorkerPlugin,

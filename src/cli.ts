@@ -9,7 +9,7 @@ yargs()
   .env("OLS")
   .option("database-path", {
     type: "string",
-    description: "Path to the local database file",
+    description: "Path to the local database directory",
     required: true,
     coerce: (arg: string) => {
       fs.mkdirSync(arg, {recursive: true});

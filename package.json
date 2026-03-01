@@ -1,8 +1,10 @@
 {
   "name": "obsidian-livesync-cli",
+  "private": true,
+  "version": "1.0.0",
   "scripts": {
     "build": "bun run build.ts",
-    "run": "bun run build && bun run dist/cli.js"
+    "dev": "bun run build && bun run dist/cli.js"
   },
   "devDependencies": {
     "@tsconfig/svelte": "^5.0.8",

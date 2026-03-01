@@ -5,7 +5,7 @@ bun = "latest"
 
 [tasks.prepare]
 description = "Prepare for release (Run from GitHub Actions)"
-run = """jq --arg v "{{option(name='version')}}" '.version = $v' deno.jsonc > tmp.json && mv tmp.json deno.jsonc"""
+run = """jq --arg v "{{option(name='version')}}" '.version = $v' package.json > tmp.json && mv tmp.json package.json"""
 
 [tasks.publish]
 description = "Publish to JSR (Run from GitHub Actions)"
