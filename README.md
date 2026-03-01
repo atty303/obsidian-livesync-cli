@@ -15,7 +15,7 @@ It is created to extract obsidian-livesync vaults in GitHub Actions for Quartz.
 
 ## Usage
 
-1. Ensure [mise](https://jdx.mise.dev) is installed.
+1. Ensure [mise](https://mise.jdx.dev) is installed.
 2. Run `mise install`.
 3. Run CLI with `bun run cli -- sync ...`.
 
