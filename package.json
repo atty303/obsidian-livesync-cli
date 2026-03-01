@@ -1,15 +1,14 @@
 {
   "name": "obsidian-livesync-cli",
   "scripts": {
-    "build": "node esbuild.config.mjs",
-    "run": "npm run build && node dist/cli.js"
+    "build": "bun esbuild.config.mjs",
+    "run": "npm run build && bun dist/cli.js"
   },
   "devDependencies": {
     "@tsconfig/svelte": "^5.0.8",
     "esbuild": "^0.27.3",
     "esbuild-plugin-inline-worker": "^0.1.1",
     "esbuild-svelte": "^0.9.4",
-    "fake-indexeddb": "^6.2.5",
     "svelte": "^5.53.6",
     "typescript": "^5.9.3"
   },
@@ -20,9 +19,11 @@
     "@smithy/middleware-apply-body-checksum": "^4.3.9",
     "@smithy/protocol-http": "^5.3.9",
     "@smithy/querystring-builder": "^4.2.9",
+    "@smithy/util-retry": "^4.2.10",
     "diff-match-patch": "^1.0.5",
     "fflate": "^0.8.2",
     "idb": "^8.0.3",
+    "indexeddbshim": "^16.1.0",
     "minimatch": "^10.2.2",
     "octagonal-wheels": "^0.1.45",
     "pouchdb-adapter-http": "^9.0.0",
@@ -37,6 +38,7 @@
     "pouchdb-replication": "^9.0.0",
     "pouchdb-utils": "^9.0.0",
     "qrcode-generator": "^1.4.4",
+    "transform-pouch": "^2.0.0",
     "trystero": "^0.22.0",
     "xxhash-wasm-102": "npm:xxhash-wasm@^1.0.2"
   }

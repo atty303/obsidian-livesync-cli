@@ -1,4 +1,15 @@
-import "fake-indexeddb/auto";
+import setGlobalVars from 'indexeddbshim';
+
+setGlobalVars(null, {
+  checkOrigin: false,
+  databaseBasePath: "scratch",
+});
+
+import IDBPouch from "pouchdb-adapter-idb";
+
+PouchDB.plugin(IDBPouch);
+
+// import "fake-indexeddb/auto";
 
 import {ServiceContext} from "obsidian-livesync/lib/src/services/base/ServiceBase.ts";
 import PouchDB from "pouchdb-core";
@@ -8,12 +19,13 @@ import {
 } from "obsidian-livesync/lib/src/services/implements/headless/HeadlessDatabaseService.ts";
 import {
   ObsidianLiveSyncSettings,
-} from "obsidian-livesync/src/lib/src/common/types.ts";
+} from "obsidian-livesync/lib/src/common/types.ts";
 import {OpenKeyValueDatabase} from "obsidian-livesync/common/KeyValueDB.ts";
 import {LiveSyncLocalDB} from "obsidian-livesync/lib/src/pouchdb/LiveSyncLocalDB.ts";
 import {
   LiveSyncJournalReplicator, LiveSyncJournalReplicatorEnv
 } from "obsidian-livesync/lib/src/replication/journal/LiveSyncJournalReplicator.ts";
+
 
 export type {ObsidianLiveSyncSettings};
 
@@ -77,12 +89,17 @@ export async function make(settings: ObsidianLiveSyncSettings): Promise<CliCore>
   const hub = new HeadlessServiceHub(context, {
     database: class HeadlessDatabaseServiceExt<T extends ServiceContext> extends HeadlessDatabaseService<T> {
       override createPouchDBInstance<T extends object>(
-        _name?: string,
+        name?: string,
         _options?: PouchDB.Configuration.DatabaseConfiguration
       ): PouchDB.Database<T> {
-        return new PouchDB(settings.url + "/" + settings.database, {
-          auth: {username: settings.username, password: settings.password},
+        // const storage = new level.ClassicLevel();
+        console.log(PouchDB.adapters);
+        const db = new PouchDB(name, {
+          adapter: "idb",
+          // db: storage,
         });
+        console.log(db.adapter);
+        return db;
       }
     },
   });

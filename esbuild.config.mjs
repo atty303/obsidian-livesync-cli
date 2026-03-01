@@ -17,6 +17,7 @@ const externals = [
   "@lezer/common",
   "@lezer/highlight",
   "@lezer/lr",
+  "sqlite3"
 ];
 
 await esbuild.build({

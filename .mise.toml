@@ -1,8 +1,7 @@
 [tools]
 hk = "latest"
 pkl = "latest"
-node = "lts"
-deno = "latest"
+bun = "latest"
 
 [tasks.prepare]
 description = "Prepare for release (Run from GitHub Actions)"
