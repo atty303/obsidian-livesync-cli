@@ -1,9 +1,9 @@
 import * as process from "node:process";
+import * as fs from "node:fs";
 import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
 
 import {type BucketSyncSetting, make, type ObsidianLiveSyncSettings} from "./mod.ts";
-import type {HashAlgorithm} from "obsidian-livesync/lib/src/common/models/setting.type.ts";
 
 yargs()
   .env("OLS")
@@ -11,6 +11,10 @@ yargs()
     type: "string",
     description: "Path to the local database file",
     required: true,
+    coerce: (arg: string) => {
+      fs.mkdirSync(arg, {recursive: true});
+      return arg;
+    },
   })
   .option("remote-type", {
     type: "string",
@@ -75,10 +79,10 @@ yargs()
         bucket: argv.remote.bucket,
         region: argv.remote.region,
         endpoint: argv.remote.endpoint,
-        // useCustomRequestHandler: false,
+        useCustomRequestHandler: false,
         bucketCustomHeaders: argv.remote.customHeaders,
         bucketPrefix: argv.remote.bucketPrefix,
-        // forcePathStyle: argv.remote.forcePathStyle,
+        forcePathStyle: argv.remote.forcePathStyle,
       };
       const settings: ObsidianLiveSyncSettings = {
         sqliteDatabasePath: argv.databasePath,
@@ -99,27 +103,11 @@ yargs()
       required: true,
     });
   }, async (argv) => {
-    const bucketSyncSettings: BucketSyncSetting = {
-      accessKey: argv.remote.accessKey,
-      secretKey: argv.remote.secretKey,
-      bucket: argv.remote.bucket,
-      region: argv.remote.region,
-      endpoint: argv.remote.endpoint,
-      // useCustomRequestHandler: false,
-      bucketCustomHeaders: argv.remote.customHeaders,
-      bucketPrefix: argv.remote.bucketPrefix,
-      // forcePathStyle: argv.remote.forcePathStyle,
-    };
     const outputPath = argv.outputPath;
     const cli = await make({
       sqliteDatabasePath: argv.databasePath,
-      remoteType: argv.remoteType,
-      // hashAlg: "xxhash64",
-      encrypt: false,
-      ...bucketSyncSettings,
     });
     await cli.start();
-    await cli.sync();
     await cli.export(outputPath);
   })
   .parse(hideBin(process.argv));
