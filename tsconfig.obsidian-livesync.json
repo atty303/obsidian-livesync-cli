@@ -1,0 +1,7 @@
+{
+  "extends": "./vendor/obsidian-livesync/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false
+  }
+}

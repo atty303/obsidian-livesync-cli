@@ -1,6 +1,7 @@
 [tools]
 hk = "latest"
 pkl = "latest"
+node = "lts"
 deno = "latest"
 
 [tasks.prepare]

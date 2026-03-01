@@ -1,2 +1,5 @@
+.mise.local.toml
+dist/
 node_modules/
 .idea/
+work/
