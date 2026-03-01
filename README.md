@@ -15,8 +15,9 @@ It is created to extract obsidian-livesync vaults in GitHub Actions for Quartz.
 
 ## Usage
 
-Download the latest release
-from [Releases](https://github.com/atty303/obsidian-livesync-cli/releases).
+1. Ensure [mise](https://jdx.mise.dev) is installed.
+2. Run `mise install`.
+3. Run CLI with `bun run cli -- sync ...`.
 
 ### Syncing
 
@@ -62,7 +63,7 @@ export OLS_REMOTE__SECRET_KEY=<your secret key>
 export OLS_REMOTE__BUCKET=<your bucket name>
 export OLS_REMOTE__REGION=<your region>
 
-obsidian-livesync-cli sync --database-path .db
+bun run cli sync --database-path .db
 ```
 
 ### Exporting
@@ -80,16 +81,10 @@ Options:
 Example:
 
 ```bash
-obsidian-livesync-cli export --database-path .db --output-path vault
+bun run cli export --database-path .db --output-path vault
 ```
 
-## Development
-
-1. Ensure [mise](https://jdx.mise.dev) is installed.
-2. Run `mise install`.
-3. Run CLI with `bun run dev -- sync ...`.
-
-### Notes
+## Notes
 
 - Initially, I tried to run it with Deno, but due to incompatibilities with
   Node, multiple patches to obsidian-livesync were required, so I switched to
@@ -97,3 +92,8 @@ obsidian-livesync-cli export --database-path .db --output-path vault
 - Due to Bun
   Issue [oven-sh/bun#25860](https://github.com/oven-sh/bun/issues/25860), the
   async version of fflate does not work.
+
+## TODO
+
+- [ ] Add the single-file executable. (How to bundle sqlite3 native module?)
+- [ ] Add a GitHub Action for exporting.

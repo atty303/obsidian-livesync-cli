@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "bun run build.ts",
-    "dev": "bun run build && bun run dist/cli.js"
+    "cli": "bun run build && bun run dist/cli.js"
   },
   "devDependencies": {
     "@tsconfig/svelte": "^5.0.8",

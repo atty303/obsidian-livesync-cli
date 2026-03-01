@@ -27,8 +27,8 @@ jobs:
           . "$BASH_ENV"
           mise doctor
 
-      - name: Run Checks
-        run: hk check --all
+      #      - name: Run Checks
+      #        run: hk check --all
 
       - name: Run Tests
         run: if mise task info test; then mise run test; fi

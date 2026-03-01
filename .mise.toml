@@ -3,10 +3,16 @@ hk = "latest"
 pkl = "latest"
 bun = "latest"
 
+[tasks.build]
+description = "Build CLI"
+run = [
+  "bun run build",
+]
+
 [tasks.prepare]
 description = "Prepare for release (Run from GitHub Actions)"
-run = """jq --arg v "{{option(name='version')}}" '.version = $v' package.json > tmp.json && mv tmp.json package.json"""
-
-[tasks.publish]
-description = "Publish to JSR (Run from GitHub Actions)"
-run = "npx jsr publish"
+run = [
+  """jq --arg v "{{option(name='version')}}" '.version = $v' package.json > tmp.json && mv tmp.json package.json""",
+  "bun install",
+  "mise run build",
+]

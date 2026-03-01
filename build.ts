@@ -53,15 +53,19 @@ const patchVendorCompressPlugin: BunPlugin = {
   },
 };
 
+const compile = Bun.argv.includes("--compile");
+
 await Bun.build({
   entrypoints: ["src/cli.ts"],
   outdir: "dist",
   external: externals,
-  target: "node",
-  format: "cjs",
+  target: "bun",
   define: {
     "MANIFEST_VERSION": `"${pkg.version}"`,
   },
+  compile: compile ? {
+    outfile: "obsidian-livesync-cli"
+  } : undefined,
   plugins: [
     mockWorkerPlugin,
     patchVendorCompressPlugin,
