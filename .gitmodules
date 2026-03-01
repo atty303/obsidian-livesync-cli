@@ -1,3 +1,3 @@
-[submodule "vendor/livesync-commonlib"]
-	path = vendor/livesync-commonlib
-	url = https://github.com/vrtmrz/livesync-commonlib.git
+[submodule "vendor/obsidian-livesync"]
+	path = vendor/obsidian-livesync
+	url = https://github.com/atty303/obsidian-livesync.git
