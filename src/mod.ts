@@ -1,70 +1,65 @@
+import setGlobalVars from "indexeddbshim";
 import openDatabase from "websql";
-import setGlobalVars from 'indexeddbshim';
-
-global.window = globalThis;
-setGlobalVars(globalThis, {
-  win: {openDatabase},
-  checkOrigin: false,
-  databaseBasePath: "scratch",
-});
-shimIndexedDB.__setConfig(
-  {
-    checkOrigin: false,
-    databaseBasePath: "scratch",
-  });
-
-// shimIndexedDB.__useShim();
-// globalThis.indexedDB = shimIndexedDB;
-
-
-// import setGlobalVars from 'indexeddbshim';
-//
-// setGlobalVars(global, {
-//   checkOrigin: false,
-//   databaseBasePath: "scratch",
-// });
-
-import IDBPouch from "pouchdb-adapter-idb";
-
-PouchDB.plugin(IDBPouch);
-
-// import "fake-indexeddb/auto";
-
-import {ServiceContext} from "obsidian-livesync/lib/src/services/base/ServiceBase.ts";
-import PouchDB from "pouchdb-core";
-import {HeadlessServiceHub} from "obsidian-livesync/lib/src/services/HeadlessServices.ts";
+import {defaultLoggerEnv} from "octagonal-wheels/common/logger";
 import {
-  HeadlessDatabaseService
-} from "obsidian-livesync/lib/src/services/implements/headless/HeadlessDatabaseService.ts";
-import {
+  BucketSyncSetting,
+  EntryTypes,
+  LOG_LEVEL_VERBOSE,
   ObsidianLiveSyncSettings,
 } from "obsidian-livesync/lib/src/common/types.ts";
+import PouchDB from "pouchdb-core";
+import IDBPouch from "pouchdb-adapter-idb";
+import * as path from "node:path";
+import * as fs from "node:fs";
+import {ServiceContext} from "obsidian-livesync/lib/src/services/base/ServiceBase.ts";
+import {HeadlessServiceHub} from "obsidian-livesync/lib/src/services/HeadlessServices.ts";
+import {
+  HeadlessDatabaseService,
+} from "obsidian-livesync/lib/src/services/implements/headless/HeadlessDatabaseService.ts";
 import {OpenKeyValueDatabase} from "obsidian-livesync/common/KeyValueDB.ts";
 import {LiveSyncLocalDB} from "obsidian-livesync/lib/src/pouchdb/LiveSyncLocalDB.ts";
 import {
-  LiveSyncJournalReplicator, LiveSyncJournalReplicatorEnv
+  LiveSyncJournalReplicator,
+  LiveSyncJournalReplicatorEnv,
 } from "obsidian-livesync/lib/src/replication/journal/LiveSyncJournalReplicator.ts";
 
+setGlobalVars(globalThis, {
+  win: {openDatabase},
+  checkOrigin: false,
+});
 
-export type {ObsidianLiveSyncSettings};
+defaultLoggerEnv.minLogLevel = LOG_LEVEL_VERBOSE;
+
+PouchDB.plugin(IDBPouch);
+
+export type {BucketSyncSetting, ObsidianLiveSyncSettings};
 
 export interface LiveSyncCli {
-  start(): Promise<void>
+  start(): Promise<void>;
+
+  sync(): Promise<void>;
 }
 
 class CliCore implements LiveSyncJournalReplicatorEnv, LiveSyncCli {
   replicationStat: ReactiveSource<ReplicationStat>;
   localDatabase: LiveSyncLocalDB;
 
-  constructor(public services: ServiceHub, public kvDB: KeyValueDatabase, private _settings: ObsidianLiveSyncSettings) {
-    this.localDatabase = new LiveSyncLocalDB(_settings.url, this);
+  constructor(
+    public services: ServiceHub,
+    public kvDB: KeyValueDatabase,
+    private _settings: ObsidianLiveSyncSettings,
+  ) {
+    this.localDatabase = new LiveSyncLocalDB("local", this);
   }
 
   get simpleStore(): SimpleStore<any, any> {
     return this.kvDB as SimpleStore<CheckPointInfo>;
   }
 
-  getSettings(): RemoteDBSettings & BucketSyncSetting & Pick<ObsidianLiveSyncSettings, "remoteType"> {
+  getSettings():
+  & RemoteDBSettings
+    & BucketSyncSetting
+    & Pick<ObsidianLiveSyncSettings, "remoteType"> {
     return this._settings;
   }
 
@@ -79,46 +74,92 @@ class CliCore implements LiveSyncJournalReplicatorEnv, LiveSyncCli {
 
     await this.services.databaseEvents.initialiseDatabase(false, false);
     await this.services.appLifecycle.onFirstInitialise();
-    await this.services.database.openDatabase({
-      databaseEvents: this.services.databaseEvents,
-      replicator: this.services.replicator,
-    });
+    // await this.services.database.openDatabase({
+    //   databaseEvents: this.services.databaseEvents,
+    //   replicator: this.services.replicator,
+    // });
     // await core.localDatabase.initializeDatabase();
     await this.services.appLifecycle.onLoaded();
     await this.services.appLifecycle.onReady();
 
-    console.log("Replication started");
     // await hub.replication.markUnlocked();
-    const r = await this.services.replicator.getActiveReplicator().openReplication(this.getSettings(), false, true, true);
-    console.log(r);
-    for await (const doc of this.services.database.localDatabase.findAllDocs()) {
-      console.log(doc.path);
-      // const body = await this.services.database.localDatabase.getDBEntry(doc.path);
-      // if (body !== false) {
-      //   console.log(body);
-      // }
-    }  // hub.replicator.getActiveReplicator().replicateAllFromServer(conf);
+  }
+
+  async sync() {
+    const replicator = this.services.replicator.getActiveReplicator();
+    if (!replicator) {
+      throw new Error("No replicator found");
+    }
+    await replicator.openReplication(this.getSettings(), false, true, false);
+    await replicator.replicateAllFromServer(this.getSettings());
+    replicator.closeReplication();
+  }
+
+  async export(outputPath: string) {
+    const db: LiveSyncLocalDB | null = this.services.database.localDatabase;
+    if (!db) {
+      throw new Error("No local database found");
+    }
+
+    fs.mkdirSync(outputPath, {recursive: true});
+
+    for await (const doc of db.findAllDocs()) {
+      const entry = await db.getDBEntry(doc.path);
+      if (entry === false) {
+        console.log(`Failed to get entry for ${doc.path}`);
+        continue;
+      }
+      if (entry.deleted) {
+        console.log(`Skip deleted entry: ${entry.path}`);
+        continue;
+      }
+      if (
+        entry.type === EntryTypes["NOTE_PLAIN"] ||
+        entry.type === EntryTypes["NOTE_BINARY"]
+      ) {
+        const filePath = path.join(outputPath, entry.path);
+        const dir = path.dirname(filePath);
+        fs.mkdirSync(dir, {recursive: true});
+        let content: Buffer | string;
+        if (entry.type === EntryTypes["NOTE_BINARY"]) {
+          content = Buffer.concat(
+            entry.data.map((d) => Buffer.from(d, "base64")),
+          );
+        } else {
+          content = entry.data.join("");
+        }
+        fs.writeFileSync(filePath, content);
+        console.log(`Exported: ${filePath}`);
+      } else {
+        console.log(`Skip non-note entry: ${entry.path}`);
+      }
+    }
   }
 }
 
+export async function make(
+  settings: ObsidianLiveSyncSettings & {
+    sqliteDatabasePath: string;
+  },
+): Promise<CliCore> {
+  shimIndexedDB.__setConfig(
+    {
+      databaseBasePath: settings.sqliteDatabasePath,
+    },
+  );
 
-export async function make(settings: ObsidianLiveSyncSettings): Promise<CliCore> {
   const context = new ServiceContext();
 
   const hub = new HeadlessServiceHub(context, {
-    database: class HeadlessDatabaseServiceExt<T extends ServiceContext> extends HeadlessDatabaseService<T> {
+    database: class HeadlessDatabaseServiceExt<T extends ServiceContext>
+      extends HeadlessDatabaseService<T> {
       override createPouchDBInstance<T extends object>(
         name?: string,
-        _options?: PouchDB.Configuration.DatabaseConfiguration
+        _options?: PouchDB.Configuration.DatabaseConfiguration,
       ): PouchDB.Database<T> {
-        // const storage = new level.ClassicLevel();
-        console.log(PouchDB.adapters);
-        const db = new PouchDB(name, {
+        return new PouchDB(name, {
           adapter: "idb",
-          // db: storage,
         });
-        console.log(db.adapter);
-        return db;
       }
     },
   });
@@ -137,28 +178,34 @@ export async function make(settings: ObsidianLiveSyncSettings): Promise<CliCore>
   hub.replicator.getNewReplicator.addHandler(() => {
     return Promise.resolve(new LiveSyncJournalReplicator(core));
   });
-  hub.databaseEvents.initialiseDatabase.setHandler(async (showingNotice: boolean = false,
-                                                          reopenDatabase = true,
-                                                          ignoreSuspending: boolean = false): Promise<boolean> => {
-    hub.appLifecycle.resetIsReady();
-    if (!await hub.database.openDatabase({
-      replicator: hub.replicator,
-      databaseEvents: hub.databaseEvents,
-    })) {
+  hub.databaseEvents.initialiseDatabase.setHandler(
+    async (
+      showingNotice: boolean = false,
+      reopenDatabase = true,
+      ignoreSuspending: boolean = false,
+    ): Promise<boolean> => {
       hub.appLifecycle.resetIsReady();
-      return false;
-    }
-    if (hub.database.localDatabase.isReady) {
-      // await hub.vault.scanVault(showingNotice, ignoreSuspending);
-    }
-    if (!(await hub.databaseEvents.onDatabaseInitialised(showingNotice))) {
-      // this.logDetectedError(ERR_INITIALISATION_FAILED, LOG_LEVEL_NOTICE);
-      return false;
-    }
-    hub.appLifecycle.markIsReady();
-    // await hub.fileProcessing.commitPendingFileEvents();
-    return true;
-  });
+      if (
+        !await hub.database.openDatabase({
+          replicator: hub.replicator,
+          databaseEvents: hub.databaseEvents,
+        })
+      ) {
+        hub.appLifecycle.resetIsReady();
+        return false;
+      }
+      if (hub.database.localDatabase.isReady) {
+        // await hub.vault.scanVault(showingNotice, ignoreSuspending);
+      }
+      if (!(await hub.databaseEvents.onDatabaseInitialised(showingNotice))) {
+        // this.logDetectedError(ERR_INITIALISATION_FAILED, LOG_LEVEL_NOTICE);
+        return false;
+      }
+      hub.appLifecycle.markIsReady();
+      // await hub.fileProcessing.commitPendingFileEvents();
+      return true;
+    },
+  );
 
   return core;
 }
