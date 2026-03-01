@@ -1,12 +1,6 @@
 {
   "extends": "./vendor/obsidian-livesync/tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "noEmit": false,
-//    "baseUrl": "./vendor/obsidian-livesync/src",
-//    "paths": {
-//      "@lib/worker/bgWorker.ts": ["./lib/src/worker/bgWorker.mock.ts"],
-//      "./bgWorker.ts": ["./lib/src/worker/bgWorker.mock.ts"]
-//    }
+    "composite": true
   }
 }

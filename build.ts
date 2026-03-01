@@ -1,20 +1,7 @@
 import path from "node:path";
 
 const externals = [
-  "obsidian",
-  "electron",
-  "crypto",
-  "@codemirror/autocomplete",
-  "@codemirror/collab",
-  "@codemirror/commands",
-  "@codemirror/language",
-  "@codemirror/lint",
-  "@codemirror/search",
-  "@codemirror/state",
-  "@codemirror/view",
-  "@lezer/common",
-  "@lezer/highlight",
-  "@lezer/lr",
+  // "crypto",
   "sqlite3"
 ];
 
@@ -33,10 +20,11 @@ const mockWorkerPlugin: BunPlugin = {
 };
 
 await Bun.build({
-  entrypoints: ["src/main.ts"],
-  outfile: "dist/cli.js",
+  entrypoints: ["src/cli.ts"],
+  outdir: "dist",
   external: externals,
-  platform: "node",
+  target: "node",
+  format: "cjs",
   define: {
     "MANIFEST_VERSION": '"0.0.0"',
   },

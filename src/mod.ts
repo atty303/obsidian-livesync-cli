@@ -1,9 +1,28 @@
+import openDatabase from "websql";
 import setGlobalVars from 'indexeddbshim';
 
-setGlobalVars(null, {
+global.window = globalThis;
+setGlobalVars(globalThis, {
+  win: {openDatabase},
   checkOrigin: false,
   databaseBasePath: "scratch",
 });
+shimIndexedDB.__setConfig(
+  {
+    checkOrigin: false,
+    databaseBasePath: "scratch",
+  });
+
+// shimIndexedDB.__useShim();
+// globalThis.indexedDB = shimIndexedDB;
+
+
+// import setGlobalVars from 'indexeddbshim';
+//
+// setGlobalVars(global, {
+//   checkOrigin: false,
+//   databaseBasePath: "scratch",
+// });
 
 import IDBPouch from "pouchdb-adapter-idb";
 
@@ -74,10 +93,10 @@ class CliCore implements LiveSyncJournalReplicatorEnv, LiveSyncCli {
     console.log(r);
     for await (const doc of this.services.database.localDatabase.findAllDocs()) {
       console.log(doc.path);
-      const body = await this.services.database.localDatabase.getDBEntry(doc.path);
-      if (body !== false) {
-        console.log(body);
-      }
+      // const body = await this.services.database.localDatabase.getDBEntry(doc.path);
+      // if (body !== false) {
+      //   console.log(body);
+      // }
     }  // hub.replicator.getActiveReplicator().replicateAllFromServer(conf);
   }
 }
