@@ -180,6 +180,11 @@ To speed up the sync process, it is recommended to cache the database file.
     remote-endpoint: ${{ secrets.OLS_ENDPOINT }}
 ```
 
+### Example Usage
+
+You can refer to my personal Vault configuration using Quartz at
+https://github.com/atty303/obsidian-quartz.
+
 ## Development
 
 This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
