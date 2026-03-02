@@ -129,6 +129,7 @@ class CliCore implements LiveSyncJournalReplicatorEnv, LiveSyncCli {
           content = entry.data.join("");
         }
         fs.writeFileSync(filePath, content);
+        fs.utimesSync(filePath, entry.mtime, entry.mtime);
         console.log(`Exported: ${filePath}`);
       } else {
         console.log(`Skip non-note entry: ${entry.path}`);
