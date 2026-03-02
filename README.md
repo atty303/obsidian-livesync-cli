@@ -88,6 +88,68 @@ Example: `--remote.access-key` → `OLS_REMOTE__ACCESS_KEY`
 
 Detailed options can be checked with `./obsidian-livesync-cli --help`.
 
+## GitHub Actions
+
+You can use the official GitHub Action to sync and export your Vault in CI
+environments.
+
+### `actions/export`
+
+This action performs both `sync` and `export` in a single step. It automatically
+downloads the appropriate binary for the runner's OS and architecture.
+
+```yaml
+- name: Export Vault
+  uses: atty303/obsidian-livesync-cli/actions/export@main
+  with:
+    # Path to the local SQLite database (default: .db)
+    database-path: .db
+    # Path to the output directory (default: ./vault)
+    output-path: ./vault
+    # S3 configuration (can be omitted if env vars are set)
+    remote-access-key: ${{ secrets.OLS_ACCESS_KEY }}
+    remote-secret-key: ${{ secrets.OLS_SECRET_KEY }}
+    remote-bucket: my-vault-bucket
+    remote-region: ap-northeast-1
+    remote-endpoint: https://s3.amazonaws.com
+```
+
+#### Inputs
+
+| Input               | Description                                       | Default   | Required |
+|:--------------------|:--------------------------------------------------|:----------|:---------|
+| `database-path`     | Path to the local SQLite database                 | `.db`     | Yes      |
+| `output-path`       | Path to the output directory                      | `./vault` | Yes      |
+| `remote-access-key` | S3 access key                                     | -         | No       |
+| `remote-secret-key` | S3 secret key                                     | -         | No       |
+| `remote-bucket`     | S3 bucket name                                    | -         | No       |
+| `remote-region`     | S3 region name                                    | -         | No       |
+| `remote-endpoint`   | S3 endpoint URL                                   | -         | No       |
+| `version`           | Version of obsidian-livesync-cli (e.g., `v0.1.0`) | `latest`  | Yes      |
+
+#### Example with Caching
+
+To speed up the sync process, it is recommended to cache the database file.
+
+```yaml
+- name: Cache database
+  uses: actions/cache@v4
+  with:
+    path: .db
+    key: ${{ runner.os }}-ols-db-${{ github.run_id }}
+    restore-keys: |
+      ${{ runner.os }}-ols-db-
+
+- name: Export Vault
+  uses: atty303/obsidian-livesync-cli/actions/export@main
+  with:
+    remote-access-key: ${{ secrets.OLS_ACCESS_KEY }}
+    remote-secret-key: ${{ secrets.OLS_SECRET_KEY }}
+    remote-bucket: ${{ secrets.OLS_BUCKET }}
+    remote-region: ap-northeast-1
+    remote-endpoint: ${{ secrets.OLS_ENDPOINT }}
+```
+
 ## Development
 
 This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
@@ -97,7 +159,7 @@ This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
 2. Run `mise install` to set up the necessary runtime (Bun).
 3. Use `mise run <task>` for common development tasks:
   - `mise run build`: Build for development.
-  - `mise run build -- --compile`: Build standalone binary for current
+- `mise run build -- --compile`: Build standalone binary for supported
     architecture.
   - `bun run cli`: Run CLI directly from source.
 
@@ -113,4 +175,4 @@ This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
 
 ## TODO
 
-- [ ] Create a GitHub Action for extraction.
+- [x] Create a GitHub Action for extraction.

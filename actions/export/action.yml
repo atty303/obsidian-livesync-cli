@@ -1,0 +1,91 @@
+name: 'obsidian-livesync-cli-export'
+description: 'Sync and export files from obsidian-livesync remote storage'
+inputs:
+  database-path:
+    description: 'Path to the local SQLite database'
+    required: true
+    default: '.db'
+  output-path:
+    description: 'Path to the output directory'
+    required: true
+    default: './vault'
+  remote-access-key:
+    description: 'S3 access key'
+  remote-secret-key:
+    description: 'S3 secret key'
+  remote-bucket:
+    description: 'S3 bucket name'
+  remote-region:
+    description: 'S3 region name'
+  remote-endpoint:
+    description: 'S3 endpoint URL'
+  version:
+    description: 'Version of obsidian-livesync-cli to use (e.g., latest, v0.1.0)'
+    required: true
+    default: 'latest'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download obsidian-livesync-cli
+      shell: bash
+      run: |
+        case "${{ runner.os }}" in
+          Linux) OS="linux" ;;
+          macOS) OS="darwin" ;;
+          Windows) OS="windows" ;;
+          *) echo "Unsupported OS: ${{ runner.os }}"; exit 1 ;;
+        esac
+
+        case "${{ runner.arch }}" in
+          X64) ARCH="x64" ;;
+          ARM64) ARCH="arm64" ;;
+          *) echo "Unsupported Arch: ${{ runner.arch }}"; exit 1 ;;
+        esac
+
+        BINARY_NAME="obsidian-livesync-cli-$OS-$ARCH"
+        if [ "$OS" = "windows" ]; then
+          BINARY_NAME="$BINARY_NAME.exe"
+        fi
+
+        VERSION="${{ inputs.version }}"
+        if [ "$VERSION" = "latest" ]; then
+          DOWNLOAD_URL="https://github.com/atty303/obsidian-livesync-cli/releases/latest/download/$BINARY_NAME"
+        else
+          DOWNLOAD_URL="https://github.com/atty303/obsidian-livesync-cli/releases/download/$VERSION/$BINARY_NAME"
+        fi
+
+        echo "Downloading $DOWNLOAD_URL..."
+        if [ "$OS" = "windows" ]; then
+          curl -L -o obsidian-livesync-cli.exe "$DOWNLOAD_URL"
+        else
+          curl -L -o obsidian-livesync-cli "$DOWNLOAD_URL"
+          chmod +x obsidian-livesync-cli
+        fi
+
+    - name: Run sync
+      shell: bash
+      env:
+        OLS_DATABASE_PATH: ${{ inputs.database-path }}
+        OLS_REMOTE__ACCESS_KEY: ${{ inputs.remote-access-key }}
+        OLS_REMOTE__SECRET_KEY: ${{ inputs.remote-secret-key }}
+        OLS_REMOTE__BUCKET: ${{ inputs.remote-bucket }}
+        OLS_REMOTE__REGION: ${{ inputs.remote-region }}
+        OLS_REMOTE__ENDPOINT: ${{ inputs.remote-endpoint }}
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          ./obsidian-livesync-cli.exe sync
+        else
+          ./obsidian-livesync-cli sync
+        fi
+
+    - name: Run export
+      shell: bash
+      env:
+        OLS_DATABASE_PATH: ${{ inputs.database-path }}
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          ./obsidian-livesync-cli.exe export --output-path "${{ inputs.output-path }}"
+        else
+          ./obsidian-livesync-cli export --output-path "${{ inputs.output-path }}"
+        fi
