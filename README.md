@@ -25,10 +25,13 @@ environments such as GitHub Actions.
 
 ## Setup
 
-This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
+This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev). *
+*mise** is used for toolchain and task management.
 
 1. Install [mise](https://mise.jdx.dev).
 2. Run `mise install` to set up the necessary runtime (Bun).
+3. (Optional) Use `mise run <task>` for common development tasks (e.g.,
+   `mise run build`).
 
 ## Usage
 
