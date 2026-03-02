@@ -19,6 +19,9 @@ inputs:
     description: 'S3 region name'
   remote-endpoint:
     description: 'S3 endpoint URL'
+  remote-force-path-style:
+    description: 'Indicates whether to force path style access'
+    default: 'false'
   version:
     description: 'Version of obsidian-livesync-cli to use (e.g., latest, v0.1.0)'
     required: true
@@ -72,6 +75,7 @@ runs:
         OLS_REMOTE__BUCKET: ${{ inputs.remote-bucket }}
         OLS_REMOTE__REGION: ${{ inputs.remote-region }}
         OLS_REMOTE__ENDPOINT: ${{ inputs.remote-endpoint }}
+        OLS_REMOTE__FORCE_PATH_STYLE: ${{ inputs.remote-force-path-style }}
       run: |
         if [ "${{ runner.os }}" = "Windows" ]; then
           ./obsidian-livesync-cli.exe sync

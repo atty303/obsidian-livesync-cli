@@ -77,14 +77,15 @@ Example: `--remote.access-key` → `OLS_REMOTE__ACCESS_KEY`
 
 ### Key Options
 
-| Option                | Environment Variable     | Description                                          |
-|:----------------------|:-------------------------|:-----------------------------------------------------|
-| `--database-path`     | `OLS_DATABASE_PATH`      | Destination for the local SQLite database (Required) |
-| `--remote.access-key` | `OLS_REMOTE__ACCESS_KEY` | S3 access key                                        |
-| `--remote.secret-key` | `OLS_REMOTE__SECRET_KEY` | S3 secret key                                        |
-| `--remote.bucket`     | `OLS_REMOTE__BUCKET`     | Bucket name                                          |
-| `--remote.region`     | `OLS_REMOTE__REGION`     | Region name                                          |
-| `--remote.endpoint`   | `OLS_REMOTE__ENDPOINT`   | Endpoint for S3-compatible storage                   |
+| Option                      | Environment Variable           | Description                                          |
+|:----------------------------|:-------------------------------|:-----------------------------------------------------|
+| `--database-path`           | `OLS_DATABASE_PATH`            | Destination for the local SQLite database (Required) |
+| `--remote.access-key`       | `OLS_REMOTE__ACCESS_KEY`       | S3 access key                                        |
+| `--remote.secret-key`       | `OLS_REMOTE__SECRET_KEY`       | S3 secret key                                        |
+| `--remote.bucket`           | `OLS_REMOTE__BUCKET`           | Bucket name                                          |
+| `--remote.region`           | `OLS_REMOTE__REGION`           | Region name                                          |
+| `--remote.endpoint`         | `OLS_REMOTE__ENDPOINT`         | Endpoint for S3-compatible storage                   |
+| `--remote.force-path-style` | `OLS_REMOTE__FORCE_PATH_STYLE` | Force path style access (true/false)                 |
 
 Detailed options can be checked with `./obsidian-livesync-cli --help`.
 
@@ -112,20 +113,23 @@ downloads the appropriate binary for the runner's OS and architecture.
     remote-bucket: my-vault-bucket
     remote-region: ap-northeast-1
     remote-endpoint: https://s3.amazonaws.com
+    # Force path style access (default: false)
+    remote-force-path-style: true
 ```
 
 #### Inputs
 
-| Input               | Description                                       | Default   | Required |
-|:--------------------|:--------------------------------------------------|:----------|:---------|
-| `database-path`     | Path to the local SQLite database                 | `.db`     | Yes      |
-| `output-path`       | Path to the output directory                      | `./vault` | Yes      |
-| `remote-access-key` | S3 access key                                     | -         | No       |
-| `remote-secret-key` | S3 secret key                                     | -         | No       |
-| `remote-bucket`     | S3 bucket name                                    | -         | No       |
-| `remote-region`     | S3 region name                                    | -         | No       |
-| `remote-endpoint`   | S3 endpoint URL                                   | -         | No       |
-| `version`           | Version of obsidian-livesync-cli (e.g., `v0.1.0`) | `latest`  | Yes      |
+| Input                     | Description                                       | Default   | Required |
+|:--------------------------|:--------------------------------------------------|:----------|:---------|
+| `database-path`           | Path to the local SQLite database                 | `.db`     | Yes      |
+| `output-path`             | Path to the output directory                      | `./vault` | Yes      |
+| `remote-access-key`       | S3 access key                                     | -         | No       |
+| `remote-secret-key`       | S3 secret key                                     | -         | No       |
+| `remote-bucket`           | S3 bucket name                                    | -         | No       |
+| `remote-region`           | S3 region name                                    | -         | No       |
+| `remote-endpoint`         | S3 endpoint URL                                   | -         | No       |
+| `remote-force-path-style` | Force path style access                           | `false`   | No       |
+| `version`                 | Version of obsidian-livesync-cli (e.g., `v0.1.0`) | `latest`  | Yes      |
 
 #### Example with Caching
 
@@ -158,10 +162,11 @@ This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
 1. Install [mise](https://mise.jdx.dev).
 2. Run `mise install` to set up the necessary runtime (Bun).
 3. Use `mise run <task>` for common development tasks:
-  - `mise run build`: Build for development.
-- `mise run build -- --compile`: Build standalone binary for supported
-    architecture.
-  - `bun run cli`: Run CLI directly from source.
+
+- `mise run build`: Build for development.
+- `mise run build --compile`: Build standalone binary for supported
+  architecture.
+- `bun run cli`: Run CLI directly from source.
 
 ## Background and Notes
 
