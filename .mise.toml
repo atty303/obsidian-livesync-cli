@@ -14,5 +14,5 @@ description = "Prepare for release (Run from GitHub Actions)"
 run = [
   """jq --arg v "{{option(name='version')}}" '.version = $v' package.json > tmp.json && mv tmp.json package.json""",
   "bun install",
-  "mise run build",
+  "mise run build --compile",
 ]
