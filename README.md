@@ -23,15 +23,17 @@ environments such as GitHub Actions.
 - Uploading to remote (one-way synchronization only).
 - Support for remote types other than S3 (e.g., CouchDB).
 
-## Setup
+## Installation
 
-This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev). *
-*mise** is used for toolchain and task management.
+Download the latest binary for your architecture from
+the [GitHub Releases](https://github.com/atty303/obsidian-livesync-cli/releases).
 
-1. Install [mise](https://mise.jdx.dev).
-2. Run `mise install` to set up the necessary runtime (Bun).
-3. (Optional) Use `mise run <task>` for common development tasks (e.g.,
-   `mise run build`).
+```bash
+# Example: Linux (x64)
+curl -L -O https://github.com/atty303/obsidian-livesync-cli/releases/latest/download/obsidian-livesync-cli-linux-x64
+chmod +x obsidian-livesync-cli-linux-x64
+mv obsidian-livesync-cli-linux-x64 obsidian-livesync-cli
+```
 
 ## Usage
 
@@ -48,7 +50,7 @@ export OLS_REMOTE__REGION=<your region>
 export OLS_REMOTE__ENDPOINT=<your endpoint>
 
 # Run synchronization
-bun run cli sync --database-path .db
+./obsidian-livesync-cli sync --database-path .db
 ```
 
 > [!TIP]
@@ -60,7 +62,7 @@ bun run cli sync --database-path .db
 Extracts files (Markdown, etc.) from the synchronized database.
 
 ```bash
-bun run cli export --database-path .db --output-path ./vault
+./obsidian-livesync-cli export --database-path .db --output-path ./vault
 ```
 
 ## Configuration
@@ -84,7 +86,20 @@ Example: `--remote.access-key` → `OLS_REMOTE__ACCESS_KEY`
 | `--remote.region`     | `OLS_REMOTE__REGION`     | Region name                                          |
 | `--remote.endpoint`   | `OLS_REMOTE__ENDPOINT`   | Endpoint for S3-compatible storage                   |
 
-Detailed options can be checked with `bun run cli --help`.
+Detailed options can be checked with `./obsidian-livesync-cli --help`.
+
+## Development
+
+This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
+**mise** is used for toolchain and task management.
+
+1. Install [mise](https://mise.jdx.dev).
+2. Run `mise install` to set up the necessary runtime (Bun).
+3. Use `mise run <task>` for common development tasks:
+  - `mise run build`: Build for development.
+  - `mise run build -- --compile`: Build standalone binary for current
+    architecture.
+  - `bun run cli`: Run CLI directly from source.
 
 ## Background and Notes
 
