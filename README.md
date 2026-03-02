@@ -89,6 +89,32 @@ Example: `--remote.access-key` → `OLS_REMOTE__ACCESS_KEY`
 
 Detailed options can be checked with `./obsidian-livesync-cli --help`.
 
+### Use Cloudflare R2 as a remote storage
+
+Cloudflare R2 is a popular S3-compatible storage service. But it needs a
+specific configuration to work with `obsidian-livesync-cli`.
+
+1. Create a new bucket
+2. Create Account API Token
+
+- Permissions: `Object Read & Write`
+- Specify bucket(s): `my-vault-bucket`
+- TTL: `Your choice`
+- Client IP Address Filtering: `Your choice`
+
+3. Use the token as environment variables:
+
+- **Access Key ID** as `OLS_REMOTE__ACCESS_KEY`
+- **Secret Access Key** as `OLS_REMOTE__SECRET_KEY`
+- **Use jurisdiction-specific endpoints for S3 clients** as
+  `OLS_REMOTE__ENDPOINT`
+
+4. Set additional environment variables:
+
+- `OLS_REMOTE__BUCKET` = `my-vault-bucket`
+- `OLS_REMOTE__REGION` = `us-east-1`
+- `OLS_REMOTE__FORCE_PATH_STYLE` = `true`
+
 ## GitHub Actions
 
 You can use the official GitHub Action to sync and export your Vault in CI
