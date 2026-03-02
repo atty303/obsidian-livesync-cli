@@ -130,27 +130,52 @@ const replaceSqliteBindingsPlugin: BunPlugin = {
 
 const compile = Bun.argv.includes("--compile");
 
-const result = await Bun.build({
-  entrypoints: ["src/cli.ts"],
-  outdir: "dist",
-  external: externals,
-  target: "bun",
-  define: {
-    "MANIFEST_VERSION": `"${pkg.version}"`,
-  },
-  compile: compile ? {
-    outfile: "obsidian-livesync-cli"
-  } : undefined,
-  plugins: [
-    mockWorkerPlugin,
-    patchVendorCompressPlugin,
-    replaceSqliteBindingsPlugin,
-  ],
-});
+const targets = [
+  "bun-darwin-x64",
+  "bun-darwin-arm64",
+  "bun-linux-x64",
+  "bun-linux-arm64",
+  "bun-windows-x64",
+] as const;
 
-if (!result.success) {
-  for (const log of result.logs) {
-    console.error(log);
+async function runBuild(target: string) {
+  const isWindows = target.includes("windows");
+  const platformArch = target.replace(/^bun-/, "");
+  const extension = isWindows ? ".exe" : "";
+  const outfile = `obsidian-livesync-cli-${platformArch}${extension}`;
+
+  const result = await Bun.build({
+    entrypoints: ["src/cli.ts"],
+    outdir: compile ? undefined : "dist",
+    external: externals,
+    target: "bun",
+    define: {
+      "MANIFEST_VERSION": `"${pkg.version}"`,
+    },
+    compile: compile ? {
+      target,
+      outfile: `dist/${outfile}`,
+    } : undefined,
+    plugins: [
+      mockWorkerPlugin,
+      patchVendorCompressPlugin,
+      replaceSqliteBindingsPlugin,
+    ],
+  });
+
+  if (!result.success) {
+    for (const log of result.logs) {
+      console.error(log);
+    }
+    throw new Error(`Bun.build failed for target ${target}`);
   }
-  throw new Error("Bun.build failed");
+}
+
+if (compile) {
+  for (const target of targets) {
+    console.log(`Building for ${target}...`);
+    await runBuild(target);
+  }
+} else {
+  await runBuild("bun");
 }
