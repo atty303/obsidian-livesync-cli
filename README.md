@@ -172,7 +172,3 @@ This project uses [Bun](https://bun.sh/) and [mise](https://mise.jdx.dev).
   to [Issue #25860](https://github.com/oven-sh/bun/issues/25860) in Bun, the
   asynchronous version of `fflate` does not work, so the synchronous version is
   used.
-
-## TODO
-
-- [x] Create a GitHub Action for extraction.
