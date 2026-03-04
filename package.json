@@ -22,6 +22,7 @@
     "fflate": "^0.8.2",
     "idb": "^8.0.3",
     "indexeddbshim": "^16.1.0",
+    "minimatch": "^10.2.2",
     "octagonal-wheels": "^0.1.45",
     "pouchdb-adapter-http": "^9.0.0",
     "pouchdb-adapter-idb": "^9.0.0",

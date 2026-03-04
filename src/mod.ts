@@ -91,6 +91,9 @@ class CliCore implements LiveSyncJournalReplicatorEnv, LiveSyncCli {
       throw new Error("No replicator found");
     }
     await replicator.openReplication(this.getSettings(), false, true, false);
+
+    console.log(`remoteLocked=${replicator.remoteLocked}, remoteLockedAndDeviceNotAccepted=${replicator.remoteLockedAndDeviceNotAccepted}, remoteCleaned=${replicator.remoteCleaned}`);
+
     await replicator.replicateAllFromServer(this.getSettings());
     replicator.closeReplication();
   }

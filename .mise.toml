@@ -2,6 +2,21 @@
 hk = "latest"
 pkl = "latest"
 bun = "latest"
+"github:rustfs/rustfs" = "1.0.0-alpha.85"
+s5cmd = "latest"
+
+[env]
+AWS_ACCESS_KEY = "rustfs"
+AWS_SECRET_KEY = "rustfs"
+
+[vars]
+rustfs_volume = ".var/rustfs0"
+
+[tasks.test]
+description = "Run tests"
+run = [
+  "bun test",
+]
 
 [tasks.build]
 description = "Build CLI"
@@ -16,3 +31,14 @@ run = [
   "bun install",
   "mise run build --compile",
 ]
+
+[tasks."s3:serve"]
+description = "Serve S3"
+run = [
+  "mkdir -p {{vars.rustfs_volume}}",
+  "rustfs {{vars.rustfs_volume}}",
+]
+env.RUSTFS_ACCESS_KEY = "rustfs"
+env.RUSTFS_SECRET_KEY = "rustfs"
+env.RUSTFS_ADDRESS = ":9000"
+env.RUSTFS_CONSOLE_ENABLE = "true"
