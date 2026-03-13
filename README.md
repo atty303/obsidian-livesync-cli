@@ -1,7 +1,10 @@
 # obsidian-livesync-cli
 
 > [!WARNING]
-> This is a work in progress.
+> I have decided to use the
+> official [Obsidian Headless Sync](https://help.obsidian.md/sync/headless),
+> so I will no longer be developing this.
+> I am leaving this as an archive for others who may encounter the same problem.
 
 `obsidian-livesync-cli` is a CLI tool
 for [obsidian-livesync](https://github.com/vrtmrz/obsidian-livesync).
